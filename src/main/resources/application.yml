@@ -1,0 +1,36 @@
+spring:
+  profiles.active: own
+  application:
+    name: nacosGateway
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    reactor.ipc.netty: DEBUG
+    com.netflix.loadbalancer: DEBUG
+    com.easipass.oauthmodule: DEBUG
+  config: classpath:logback-${spring.profiles.active}.xml
+server:
+  port: 9002
+spring.kafka.producer.bootstrap-servers: 192.168.130.141:9092,192.168.130.142:9092,192.168.130.143:9092
+#开启端点
+management.endpoints.web.exposure.include: '*'
+app.id: ${spring.application.name}
+apollo.meta: http://192.168.130.65:8180
+spring.cloud.nacos.discovery.server-addr: 192.168.130.121:8841
+spring.cloud.gateway.discovery.locator:
+  enabled: true  #表明gateway开启服务注册和发现的功能，并且spring cloud gateway自动根据服务发现为每一个服务创建了一个router，这个router将以服务名开头的请求路径转发到对应的服务。
+  lowerCaseServiceId: false   #是将请求路径上的服务名配置为小写（因为服务注册的时候，向注册中心注册时将服务名转成大写的了），比如以/service-hi/*的请求路径被路由转发到服务名为service-hi的服务上。
+  filters:
+    - StripPrefix=1
+# 应用配置
+easipass:
+  oauth.config:
+      oauthUrl: http://192.168.131.211/epoa
+      clientId: frameworksvc
+      appCode: frameworksvc
+  logappender.config.kafkaTopic: log-publicservices-epoa-info
+
+  auth:
+    url: http://192.168.118.129:9087

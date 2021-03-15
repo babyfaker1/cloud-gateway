@@ -1,0 +1,137 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    ext {
+        springBootVersion = "2.1.10.RELEASE"
+        springCloudVersion = "2.1.4.RELEASE"
+        kafkaVersion = "2.2.8.RELEASE"
+        sentinelVersion = "1.6.2"
+    }
+
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.7.RELEASE")
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.7.1"
+    }
+}
+
+
+
+apply plugin: "org.sonarqube"
+
+//sonarqube {
+//    properties {
+//        property "sonar.host.url", "http://192.168.118.127:9001"
+//        property "sonar.login", "jxren"
+//        property "sonar.password", "easipass"
+//    }
+//}
+
+group 'easipass'
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public' }
+    maven { url 'http://192.168.118.127:8081/repository/maven-public/' }
+}
+
+[compileJava, compileTestJava, javadoc]*.options*.encoding = "UTF-8"
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile("org.springframework.boot:spring-boot-starter-aop:$springBootVersion")
+    compile("org.springframework.boot:spring-boot-starter-webflux:$springBootVersion")
+    compile("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+    compile("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
+    compile("org.springframework.cloud:spring-cloud-starter-gateway:$springCloudVersion")
+    compile("org.springframework.cloud:spring-cloud-starter-netflix-hystrix:$springCloudVersion")
+    //Spring Boot Actuator对外暴露应用的监控信息，Jolokia提供使用HTTP接口获取JSON格式 的数据。
+    compile("org.jolokia:jolokia-core:1.3.7")
+    //logstash
+    compile("net.logstash.logback:logstash-logback-encoder:4.11")
+    compile 'org.projectlombok:lombok:1.16.20'
+    //swagger2
+    compile(
+            "io.springfox:springfox-swagger2:2.6.1",
+            "io.springfox:springfox-swagger-ui:2.6.1"
+    )
+    //Apollo客户端
+    compile 'com.ctrip.framework.apollo:apollo-client:1.2.0'
+    //开启nocos服务发现
+    compile 'com.alibaba.cloud:spring-cloud-alibaba-nacos-discovery:2.1.0.RELEASE'
+
+    //sentinel
+    compile(
+            "com.alibaba.csp:sentinel-core:$sentinelVersion",
+            "com.alibaba.csp:sentinel-annotation-aspectj:$sentinelVersion",
+            "com.alibaba.csp:sentinel-spring-cloud-gateway-adapter:$sentinelVersion",
+            "com.alibaba.csp:sentinel-transport-simple-http:$sentinelVersion"
+    )
+
+    //kafka
+    compile ("org.springframework.kafka:spring-kafka:$kafkaVersion")
+
+
+    //亿通封装JAR
+    compile(
+            "com.easipass.framework:ep-common-core:1.0.0.31",//核心包
+            "com.easipass.framework:ep-oauth-module:1.0.0.9"//oauth接口包
+    )
+
+    //加载本地依赖
+    compile fileTree(dir: 'lib', include: ['*.jar'])
+}
+
+build.mustRunAfter clean
+task buildJar(dependsOn: [build,clean]) <<{
+    copy() {
+        from("build/libs/" + rootProject.name + ".jar")
+        into "build"
+        from("dist")
+        into "build"
+    }
+    file("build/dependency-cache").deleteDir()
+    file("build/tmp").deleteDir()
+    file("build/classes").deleteDir()
+    file("build/resources").deleteDir()
+    file("build/libs").deleteDir()
+    file("build/reports").deleteDir()
+    file("build/test-results").deleteDir()
+
+    def fileDev = file("build/dev")
+    def fileTest = file("build/test")
+    def fileProd = file("build/prod")
+    def fileJar = file("build/" + rootProject.name + ".jar")
+    fileDev.delete()
+    fileDev.mkdirs()
+    fileTest.delete()
+    fileTest.mkdirs()
+    fileProd.delete()
+    fileProd.mkdirs()
+    ["build/dev", "build/test", "build/prod"].each { dest ->
+        copy {
+            from "build/" + fileJar.getName()
+            into dest
+            from("dist/springBoot.sh")
+            into dest
+            from("dist/application_".concat(dest.replace('build/','')).concat(".yml"))
+            into dest
+            rename { String fileName ->
+                fileName.replace('_'.concat(dest.replace('build/','')), '')
+            }
+        }
+    }
+    fileJar.delete()
+    file("build/application_dev.yml").delete()
+    file("build/application_test.yml").delete()
+    file("build/application_prod.yml").delete()
+    file("build/springBoot.sh").delete()
+}
+

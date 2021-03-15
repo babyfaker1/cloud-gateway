@@ -1,0 +1,29 @@
+spring:
+  profiles.active: devTest
+  application:
+    name: nacosGateway
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    org.springframework.http.server.reactive: INFO
+    org.springframework.web.reactive: INFO
+    reactor.ipc.netty: INFO
+    com.netflix.loadbalancer: ERROR
+    com.easipass.oauthmodule: ERROR
+  config: classpath:logback-${spring.profiles.active}.xml
+server:
+  port: 9002
+#开启端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  security:
+    enabled: false
+easipass:
+  oauth:
+    appCode: nacosGateway
+app.id: nacosGateway
+apollo.meta: http://192.168.130.65:8080
+spring.cloud.nacos.discovery.server-addr: 192.168.130.121:8841

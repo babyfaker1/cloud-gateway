@@ -1,0 +1,27 @@
+spring:
+  profiles.active: devTest
+  application:
+    name: nacosGateway
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    reactor.ipc.netty: DEBUG
+  config: classpath:logback-${spring.profiles.active}.xml
+server:
+  port: 9002
+#开启端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  security:
+    enabled: false
+easipass:
+  oauth:
+    appCode: nacosGateway
+app.id: nacosGateway
+apollo.meta: http://192.168.130.65:8180
+
