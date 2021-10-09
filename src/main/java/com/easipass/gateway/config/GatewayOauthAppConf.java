@@ -13,7 +13,7 @@ import javax.annotation.PostConstruct;
 
 @Component
 @Slf4j
-public class GatewayOauthAppConf {
+public class GatewayOauthAppConf {    //a2
 
     private static JSONObject relations;
 
