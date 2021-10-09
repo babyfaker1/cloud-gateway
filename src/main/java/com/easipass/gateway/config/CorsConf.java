@@ -14,7 +14,7 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 @Configuration
-public class CorsConf {
+public class CorsConf {   //a1
 
     @Bean
     public HiddenHttpMethodFilter hiddenHttpMethodFilter () {
