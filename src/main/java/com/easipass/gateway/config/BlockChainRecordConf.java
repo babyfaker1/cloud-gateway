@@ -36,7 +36,7 @@ public class BlockChainRecordConf {
         });
     }
 
-    private static void changeConf(String value){      //c1   //c2
+    private static void changeConf(String value){      //c1   //c2  //c3
         relations = JsonUtils.jsonToBean(value , JSONObject.class);
     }
 }
