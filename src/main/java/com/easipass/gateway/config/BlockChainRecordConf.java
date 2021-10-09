@@ -26,7 +26,7 @@ public class BlockChainRecordConf {
     }
 
     @PostConstruct
-    public void init() {      //dev   //dev2
+    public void init() {      //dev   //dev2         //dev4
         ConfigFile config = ConfigService.getConfigFile("BlockChainRecordConf" , ConfigFileFormat.JSON);
         changeConf(config.getContent());
         config.addChangeListener((ConfigFileChangeEvent changeEvent) -> {
